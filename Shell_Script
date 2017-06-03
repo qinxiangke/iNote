@@ -1,0 +1,87 @@
+Shell编程
+
+认识shell和shell脚本
+Shell脚本的基本语法
+1，第一行!#/bin/bash告诉系统使用bash来执行文件的程序
+2，Shell变量之用户自定义，命名通常使用全大写，用“=”赋值，用“$”取值，要求不留空格，用命令unset取消变量的值。见示例Ex1.scrpt
+Ex1.scrpt
+#！/bin/bash
+VAR=10
+echo $VAR
+echo ${VAR}个
+unset VAR
+echo $VAR
+3，Shell变量之位置参数和系统预定义，，见示例Ex2.scrpt
+#！/bin/bash
+#Ex2.scrpt
+echo "Program name is $0"
+echo "there are totally $# parameters passed to this Program"
+echo "these parameters are $*"
+echo "the last is $?"
+echo "the pid of the runnint process is $$"
+4，Shell变量之环境变量，要注意的是命令行设置环境变量，在用户注销后会丢失，我们可以在文件$HOME/.bash_profile里定义。
+5，Shell程序和语句
+	键盘读入变量值，见示例Ex3.scrpt
+#！/bin/bash
+echo "please input name of directory"
+read DIRECTORY
+ls -a $DIRECTORY
+6，test命令，用来测试，见示例Ex4.scrpt
+	可以进行哪些测试？可以进行对字符串，整数，文件的测试。
+	对测试结果为0表示符合测试逻辑，为1表示违背测试逻辑，当我们不确定测试的结果时，可以使用命令echo $?来报告前一个命令的返回码
+#！/bin/bash
+echo "please input name of directory"
+read DIRECTORY
+[ -d $DIRECTORY ]
+echo $?
+if [ -d $DIRECTORY ]
+then ls -a $DIRECTORY
+else 
+echo "input error!"
+fi
+7，结构性语句，归类为2路分支结构，多路分支结构，循环结构。For语句是针对循环次数已知或确定的情况而使用，while语句还能对循环次数不确定或未知的情况也可以处理。
+见示例Ex5.scrpt
+#!/bin/bash
+echo "please input name of file"
+case $1 in #$1必须是字符串变量
+  hello.c)  #匹配模式以右括号结束
+    echo "edit *.c"
+    for file in `find / -name hello.c`
+    do
+       vim $file
+    done
+    ;;  #退出case语句以单独的双分号结束
+  hello)
+    echo "to run the program"
+    for program in `find / -name hello`
+    do 
+      if [ -d $program]
+      then  ls -a $program
+      else if [ -f $program]
+      then  $program
+      fi
+    done
+    ;;
+  *)
+    echo "input error！"
+esac
+8，shell函数
+Shell函数的说明必须放在调用程序的前面，调用程序可以传递参数给函数，函数也可以用return语句把运行结果返回给调用程序，见示例Ex6.sh
+#!/bin/bash
+function add()
+{
+  a=$1
+  b=$2
+  ret=`expr $a + $b`
+  return $ret
+}
+
+#echo -n "please inpout two number:"
+if [ $# -ne 2 ]
+then
+echo "parameters error!"
+exit
+fi
+add $1 $2
+echo "$1 + $2 =  $?"
+9，shell脚本调用
